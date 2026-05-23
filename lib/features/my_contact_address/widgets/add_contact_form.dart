@@ -29,6 +29,17 @@ class _AddContactFormState extends ConsumerState<AddContactForm> {
   // State to show the loading indicator
   bool _isLoading = false;
 
+  // Switch for PopScope
+  bool _canPop = false;
+
+  // Check if there is any field that has been filled by the user (Form is Dirty)
+  bool get _isFormDirty {
+    return _nameController.text.isNotEmpty ||
+        _addressController.text.isNotEmpty ||
+        _phoneController.text.isNotEmpty ||
+        _emailController.text.isNotEmpty;
+  }
+
   @override
   void dispose() {
     // REQUIRED: Clean up the controllers when the widget is destroyed (e.g., pop-up closed)
@@ -39,6 +50,29 @@ class _AddContactFormState extends ConsumerState<AddContactForm> {
     _phoneController.dispose();
     _emailController.dispose();
     super.dispose();
+  }
+
+  Future<void> _tryCloseForm() async {
+    // 1. Check if user has filled in anything
+    if (_isFormDirty) {
+      // 2. If yes, show a warning
+      final confirmDiscard = await DialogHelper.showConfirmation(
+        context: context,
+        title: "Discard Changes",
+        content: "Are you sure you want to discard your changes?",
+      );
+      // If the user selects 'No' (cancel exit), stop the closing process
+      if (!confirmDiscard) return;
+    }
+
+    // 3. If the form is still empty, OR the user selects 'Yes' (sure to discard):
+    // Unlock PopScope then close the form
+    setState(() {
+      _canPop = true;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) Navigator.pop(context); // Tutup pop-up form
+    });
   }
 
   Future<void> handleSave() async {
@@ -82,6 +116,10 @@ class _AddContactFormState extends ConsumerState<AddContactForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Contact added successfully')),
         );
+        // Buka gembok PopScope sebelum menutup form agar dialog peringatan discard tidak muncul
+        setState(() {
+          _canPop = true;
+        });
         // Close the pop-up dialog
         Navigator.pop(context);
       }
@@ -107,14 +145,12 @@ class _AddContactFormState extends ConsumerState<AddContactForm> {
   Widget build(BuildContext context) {
     // Specific widget for creating pop-up dialogs
     return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
+      canPop: _canPop,
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
 
-        final confirmExit = await DialogHelper.showConfirmation(context: context);
-        if (confirmExit) {
-          SystemNavigator.pop(); // Close app
-        }
+        // Memanggil fungsi deteksi form kotor
+        _tryCloseForm();
       },
       child: AlertDialog(
         title: const Text('Add New Contact'),
@@ -152,7 +188,7 @@ class _AddContactFormState extends ConsumerState<AddContactForm> {
         actions: [
           TextButton(
             // Plain text button (no background/shadow) for secondary actions (Cancel)
-            onPressed: () => Navigator.pop(context),
+            onPressed: _tryCloseForm,
             child: const Text('Cancel'),
           ),
           ElevatedButton(
