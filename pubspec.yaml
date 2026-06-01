@@ -48,6 +48,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -90,3 +91,15 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_native_splash:
+  # Warna background layar (Hex code tanpa alpha)
+  color: "#FFFFFF"
+  
+  # Path gambar utama
+  image: "assets/core/icons/splash_screen.png"
+  
+  # Dukungan khusus untuk Android 12 ke atas
+  android_12:
+    image: "assets/core/icons/splash_screen.png"
+    color: "#FFFFFF"

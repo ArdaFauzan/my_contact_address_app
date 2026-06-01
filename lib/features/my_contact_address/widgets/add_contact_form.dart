@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_contact_address_app/core/utils/dialog_helper.dart';
 import 'package:my_contact_address_app/core/widgets/custom_text_field.dart';
@@ -203,7 +202,7 @@ class _AddContactFormState extends ConsumerState<AddContactForm> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Simpan'),
+                : const Text('Add'),
           ),
         ],
       ),
